@@ -24,35 +24,40 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = AnecdoteAdapter(emptyList())
         recyclerView.adapter = adapter
+        var listOfAnecdotes: MutableList<Anecdote> = arrayListOf()
 
+        for (index in 1..100) {
+            val randomNumber = (1..1000).random()
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url("https://baneks.ru/$randomNumber")
+                .build()
 
-        val randomNumber = (1..100).random()
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://baneks.ru/$randomNumber")
-            .build()
-
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Ошибка загрузки данных", Toast.LENGTH_SHORT).show()
+            client.newCall(request).enqueue(object : okhttp3.Callback {
+                override fun onFailure(call: okhttp3.Call, e: IOException) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Ошибка загрузки данных", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
 
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                val html = response.body?.string()
-                val doc = Jsoup.parse(html ?: "")
+                override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                    val html = response.body?.string()
+                    val doc = Jsoup.parse(html ?: "")
 
-                val article = doc.select("article")
-                val p = article.select("p")
+                    val article = doc.select("article")
+                    val p = article.select("p")
 
-                val anecdoteText = p.text()
-                val anecdotes = listOf(Anecdote(1, anecdoteText))
-                runOnUiThread {
-                    adapter.updateAnecdotes(anecdotes)
-                    adapter.notifyDataSetChanged()
+                    val anecdoteText = p.text()
+                    val parsedAnecdote: Anecdote = Anecdote(randomNumber, anecdoteText)
+                    listOfAnecdotes.add(parsedAnecdote)
+                    runOnUiThread {
+                        adapter.updateAnecdotes(listOfAnecdotes)
+                        adapter.notifyDataSetChanged()
+                    }
                 }
-            }
-        })
+
+            })
+        }
+
     }
 }
