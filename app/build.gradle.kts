@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.example.androidprojecttask"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -36,7 +36,8 @@ android {
 }
 
 dependencies {
-
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("org.jsoup:jsoup:1.14.3")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
