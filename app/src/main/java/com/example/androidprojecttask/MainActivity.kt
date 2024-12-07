@@ -4,10 +4,16 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import org.jsoup.Jsoup
 import java.io.IOException
 
@@ -22,42 +28,44 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.rview)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = AnecdoteAdapter(emptyList())
+        adapter = AnecdoteAdapter(mutableListOf())
         recyclerView.adapter = adapter
-        var listOfAnecdotes: MutableList<Anecdote> = arrayListOf()
 
-        for (index in 1..100) {
-            val randomNumber = (1..1000).random()
+        lifecycleScope.launch {
+            val listOfAnecdotes = mutableListOf<Anecdote>()
+            for (index in 1..10) {
+                val randomNumber = (1..2000).random()
+                val response = fetchAnecdote(randomNumber)
+                if (response.isSuccessful) {
+                    val html = response.body?.string()
+                    val doc = Jsoup.parse(html ?: "")
+                    val article = doc.select("article")
+                    val p = article.select("p")
+                    val anecdoteText = p.text()
+                    val parsedAnecdote = Anecdote(randomNumber, anecdoteText)
+                    listOfAnecdotes.add(parsedAnecdote)
+                } else {
+
+                }
+            }
+            withContext(Dispatchers.Main) {
+                adapter.updateAnecdotes(listOfAnecdotes)
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    private suspend fun fetchAnecdote(randomNumber: Int): Response {
+        return withContext(Dispatchers.IO) {
             val client = OkHttpClient()
             val request = Request.Builder()
                 .url("https://baneks.ru/$randomNumber")
                 .build()
-
-            client.newCall(request).enqueue(object : okhttp3.Callback {
-                override fun onFailure(call: okhttp3.Call, e: IOException) {
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Ошибка загрузки данных", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                    val html = response.body?.string()
-                    val doc = Jsoup.parse(html ?: "")
-
-                    val article = doc.select("article")
-                    val p = article.select("p")
-
-                    val anecdoteText = p.text()
-                    val parsedAnecdote: Anecdote = Anecdote(randomNumber, anecdoteText)
-                    listOfAnecdotes.add(parsedAnecdote)
-                    runOnUiThread {
-                        adapter.updateAnecdotes(listOfAnecdotes)
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-
-            })
+            client.newCall(request).execute()
         }
-
     }
+
+
 }
+
+
