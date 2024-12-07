@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val listOfAnecdotes = mutableListOf<Anecdote>()
             for (index in 1..10) {
-                val randomNumber = (1..2000).random()
+                val randomNumber = (1..1142).random()
                 val response = fetchAnecdote(randomNumber)
                 if (response.isSuccessful) {
                     val html = response.body?.string()
