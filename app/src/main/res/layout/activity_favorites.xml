@@ -4,19 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <Button
-        android:id="@+id/button_favorites"
+        android:id="@+id/button_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Избранное" />
-
-    <Button
-        android:id="@+id/button_parse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Украсть 10 анекдотов" />
+        android:text="Вернуться" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rview"
+        android:id="@+id/favorite_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
