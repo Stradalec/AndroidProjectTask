@@ -1,5 +1,6 @@
 package com.example.androidprojecttask
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -30,6 +31,14 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = AnecdoteAdapter(mutableListOf())
         recyclerView.adapter = adapter
+        adapter.setOnItemClickListener(object : AnecdoteAdapter.OnItemClickListener {
+            override fun onItemClick(anecdote: Anecdote) {
+                val intent = Intent(this@MainActivity, AnecdoteActivity::class.java)
+                intent.putExtra("anecdote_text", anecdote.text)
+                startActivity(intent)
+            }
+        })
+
 
         lifecycleScope.launch {
             val listOfAnecdotes = mutableListOf<Anecdote>()
