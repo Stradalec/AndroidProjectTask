@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -27,9 +28,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        val editText: EditText = findViewById(R.id.et_search)
         val buttonParse = findViewById<Button>(R.id.button_parse)
         val buttonFavorites = findViewById<Button>(R.id.button_favorites)
+
         buttonFavorites.setOnClickListener {
             val intent = Intent(this, FavoritesActivity::class.java)
             startActivity(intent)
@@ -47,6 +49,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
         buttonParse.setOnClickListener() {
+            val searchWord = editText.text.toString()
+
             lifecycleScope.launch {
                 val listOfAnecdotes = mutableListOf<Anecdote>()
                 for (index in 1..10) {
@@ -58,8 +62,17 @@ class MainActivity : AppCompatActivity() {
                         val article = doc.select("article")
                         val p = article.select("p")
                         val anecdoteText = p.text()
-                        val parsedAnecdote = Anecdote(randomNumber, anecdoteText)
-                        listOfAnecdotes.add(parsedAnecdote)
+                        if (searchWord != "") {
+                            if (anecdoteText.contains(searchWord, ignoreCase = true)) {
+                                val parsedAnecdote = Anecdote(randomNumber, anecdoteText)
+                                listOfAnecdotes.add(parsedAnecdote)
+                            }
+                        } else {
+                            val parsedAnecdote = Anecdote(randomNumber, anecdoteText)
+                            listOfAnecdotes.add(parsedAnecdote)
+                        }
+
+
                     } else {
 
                     }
